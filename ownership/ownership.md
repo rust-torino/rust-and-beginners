@@ -6,7 +6,7 @@
 
 # Focus on chapter 4 of the Rust book
 
-## Prerequisite: the first three chapters of the book
+## Prerequisite: the first four chapters of the book
 
 ---
 
