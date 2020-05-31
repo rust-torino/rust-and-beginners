@@ -19,13 +19,13 @@
 # Clay
 
 * Alice owns some shaped clay
-* She can show (borrow) her shape to many people, but they cannot re-shape it
-* She can borrow the clay to John, who can reshape it
+  * She can show (borrow) her shape to many people, but they cannot re-shape it
+  * She can borrow the clay to John, who can reshape it
 * John can show the borrowed shape to other people, but not while he is shaping the clay
-* John can re-borrow the Tod, so he can change the shape
-* John must return back the clay to Alice
+  * John can re-borrow the Tod, so he can change the shape
+  * John must return back the clay to Alice
 * John could say to Tod that he cannot change the shape. Alice could have said the same.
-* Alice could also give the clay to John, which will be the new owner
+  * Alice could also give the clay to John, which will be the new owner
 
 ---
 
@@ -76,30 +76,28 @@
 #include <string.h>
 #include <stdlib.h>
 
-char *
-present(char * name) {
+char *present(char *name) {
   static char message[16];
   snprintf(message, 16, "I am %s", name);
   return message;
 }
 
-char *
-hello_world(char * message, char * name) {
-  char * present_message = present(name);
+char *hello_world(char *message, char *name) {
+  char *present_message = present(name);
 
   // Size of "Hello world! " = 13
   // Additional 1 is for space
   // Additional 1 is for the string terminator
   size_t const message_len = strlen(present_message) + 15 + strlen(message);
 
-  char * out_message = malloc(message_len);
+  char *out_message = malloc(message_len);
   sprintf(out_message, "Hello world! %s %s", message, present_message);
   return out_message;
 }
 
-int main(int argc, char* argv[]) {
-  char * yell = "Oh yeah!";
-  char * message = hello_world(yell, argv[1]);
+int main(int argc, char *argv[]) {
+  char *yell = "Oh yeah!";
+  char *message = hello_world(yell, argv[1]);
   printf("%s\n", message);
   free(message);
 }
@@ -114,16 +112,15 @@ int main(int argc, char* argv[]) {
 #include <string.h>
 #include <stdlib.h>
 
-char const *
-present(char const * const name) {
+char const *present(char const *const name) {
   static char message[16];
   int written = snprintf(message, 16, "I am %s", name);
   return written < 0 ? NULL : message;
 }
 
-char *
-hello_world(char const * const message, char const * const name) {
-  char const * const present_message = present(name);
+char *hello_world(char const *const message, 
+                  char const *const name) {
+  char const *const present_message = present(name);
 
   if (present_message == NULL) {
     return NULL;
@@ -133,7 +130,7 @@ hello_world(char const * const message, char const * const name) {
   // Additional 1 is for the string terminator
   size_t message_len = strlen(present_message) + 14;
 
-  char * out_message;
+  char *out_message;
   if (message != NULL) {
     // 1 is for an additional space
     message_len += 1 + strlen(message);
@@ -160,8 +157,8 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  char const * const yell = "Oh yeah!";
-  char * message = hello_world(yell, argv[1]);
+  char const *const yell = "Oh yeah!";
+  char *message = hello_world(yell, argv[1]);
   if (message != NULL) {
     printf("%s\n", message);
     free(message);
