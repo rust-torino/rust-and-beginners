@@ -1,0 +1,25 @@
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn count_vowel_slices_occurrences() {
+        const DATA: [&str; 3] = ["aIebaeabbioubbAiebaiE", "baiebbiouioub", "ioubioub"];
+        let mut result: Vec<_> = vowels_slices_occurrences(&DATA)
+            .into_iter()
+            .map(|(slice, occurrences)| (slice.to_lowercase(), occurrences))
+            .collect();
+        result.sort_unstable_by(|(a, _), (b, _)| a.cmp(b));
+
+        assert_eq!(
+            result,
+            vec![
+                ("aea".to_string(), 1),
+                ("aie".to_string(), 4),
+                ("iou".to_string(), 3),
+                ("iouiou".to_string(), 1),
+            ]
+        );
+    }
+}
+

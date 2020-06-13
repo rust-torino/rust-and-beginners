@@ -6,7 +6,10 @@
 
 # Focus on chapter 4 of the Rust book
 
-## Prerequisite: the first four chapters of the book
+## Prerequisites
+
+* Basic knowledge of Rust concepts: variables, loops, conditionals, pattern matching, structs and traits
+* The first four chapters of the book
 
 ---
 
@@ -65,7 +68,7 @@
 
 # Simple as C
 
-## C is sold as a simple language. It is partially true, but mantaining a C project can be hard
+## C is sold as a simple language. It is partially true, but maintaining a C project can be hard
 
 ---
 
@@ -392,3 +395,456 @@ assert_eq!(&integers[1..4], &[1, 2, 3]);
 ```
 
 Similar to `&str` in relation to `String`
+
+---
+
+# Practice together
+
+---
+
+# Exercise 1
+
+Write a function that finds all the longest contiguous substrings of vowels in a set of strings. The function must take a slice of borrowed strings and must return a vector of tuples. Each tuple must contain the index of the borrowed string in the slice, the start index of a substring and the substring with all the vowels.
+
+---
+
+# How it works
+
+I give you a `.rs` file with one or more tests that must pass. All files can be found [in the github repo](https://github.com/rust-torino/rust-and-beginners).
+
+---
+
+# Let's start
+
+Copy-paste the test
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn find_all_vowels_slices() {
+        /* ... */
+    }
+}
+```
+
+---
+
+# Write the function signature
+
+```rust
+pub fn vowels_slices(strings: &[&str]) -> Vec<(usize, usize, &str)> {
+    todo!()
+}
+```
+
+This still does not work: what's the lifetime of the `&str` in the output?
+
+---
+
+# This is the life(time)
+
+```rust
+pub fn vowels_slices<'a>(strings: &'a [&'a str]) -> Vec<(usize, usize, &'a str)> {
+    todo!()
+}
+```
+
+---
+
+# Create output, iterate over strings
+
+```rust
+let mut out = Vec::new();
+for (string_index, string) in strings.iter().enumerate() {
+    todo!()
+}
+
+out
+```
+
+---
+
+# Iterate over chars, check vowels
+
+```rust
+let mut out = Vec::new();
+for (string_index, string) in strings.iter().enumerate() {
+    for (char_index, c) in string.char_indices() {
+        match c.to_ascii_lowercase() {
+            'a' | 'e' | 'i' | 'o' | 'u' => todo!(),
+            _ => {}
+        }
+    }
+}
+
+out
+```
+
+---
+
+# Store the start of vowels slice
+
+```rust
+let mut out = Vec::new();
+for (string_index, string) in strings.iter().enumerate() {
+    let mut start = None;
+    for (char_index, c) in string.char_indices() {
+        match c.to_ascii_lowercase() {
+            'a' | 'e' | 'i' | 'o' | 'u' => {
+                if start.is_none() {
+                    start = Some(char_index)
+                }
+            }
+            _ => todo!(),
+        }
+    }
+}
+
+out
+```
+
+---
+
+# Push slices of vowels
+
+```rust
+match c.to_ascii_lowercase() {
+    /* ... */
+    _ => {
+        if let Some(slice_start) = start {
+            let slice = &string[slice_start..char_index];
+            out.push((string_index, slice_start, slice));
+            start = None;
+        }
+    }
+}
+```
+
+---
+
+# Save last slice when string ends with vowel
+
+```rust
+let mut out = Vec::new();
+for (string_index, string) in strings.iter().enumerate() {
+    let mut start = None;
+    for (char_index, c) in string.char_indices() {
+        /* ... */
+    }
+
+    if let Some(slice_start) = start {
+        let slice = &string[slice_start..];
+        out.push((string_index, slice_start, slice));
+    }
+}
+
+out
+```
+
+---
+
+# Whole code
+
+```rust
+pub fn vowels_slices<'a>(strings: &'a [&'a str]) -> Vec<(usize, usize, &'a str)> {
+    let mut out = Vec::new();
+    for (string_index, string) in strings.iter().enumerate() {
+        let mut start = None;
+        for (char_index, c) in string.char_indices() {
+            match c.to_ascii_lowercase() {
+                'a' | 'e' | 'i' | 'o' | 'u' => {
+                    if start.is_none() {
+                        start = Some(char_index)
+                    }
+                }
+                _ => {
+                    if let Some(slice_start) = start {
+                        let slice = &string[slice_start..char_index];
+                        out.push((string_index, slice_start, slice));
+                        start = None;
+                    }
+                }
+            }
+        }
+
+        if let Some(slice_start) = start {
+            let slice = &string[slice_start..];
+            out.push((string_index, slice_start, slice));
+        }
+    }
+
+    out
+}
+```
+
+---
+
+# Different approach, with iterators + one downside
+
+```rust
+use std::{convert::identity, iter};
+
+pub fn vowels_slices<'a>(strings: &'a [&'a str]) -> Vec<(usize, usize, &'a str)> {
+    strings
+        .iter()
+        .enumerate()
+        .flat_map(|(string_index, s)| {
+            s.char_indices()
+                .chain(iter::once((s.len(), '!')))
+                .scan(None, move |start, (char_index, c)| {
+                    match c.to_ascii_lowercase() {
+                        'a' | 'e' | 'i' | 'o' | 'u' => {
+                            if start.is_none() {
+                                *start = Some(char_index);
+                            }
+                            Some(None)
+                        }
+                        _ => match *start {
+                            Some(start_index) => {
+                                *start = None;
+                                Some(Some((
+                                    string_index,
+                                    start_index,
+                                    &s[start_index..char_index],
+                                )))
+                            }
+                            None => Some(None),
+                        },
+                    }
+                })
+                .filter_map(identity)
+        })
+        .collect()
+}
+```
+
+---
+
+# Practice by yourself
+
+Pair programming is appreciated and suggested
+
+---
+
+# Exercise 2
+
+Count the occurrences of longest slices of vowels. Must be returned something that can be transformed into an iterator of tuples, where the first element is a (direct or indirect) reference of a substring in the given data, the second the number of occurrences of the slice. The comparison must be case insensitive (only for ASCII vowels).
+
+---
+
+# Exercise 3
+
+A slice of numbers is given. We define a slice of numbers A with the length of 5, and we defined the operation `sum` that sums together all the values of the slice. For each A, it could exist a slice B that does not overlap with A so that `sum(A) == sum(B)`. If for the slice A exist many slices B, the longest slice must be taken, and between slices with the same length, the slice nearest the end of the string must be taken.
+Given a slice of numbers, write a function that returns all pairs of `(A, B)` as described above.
+
+---
+
+# Thanks!
+
+---
+
+---
+
+# Stop! Solutions ahead
+
+---
+
+# Hey, you've been warned!
+
+---
+
+# Exercise 2
+
+---
+
+```rust
+pub fn vowels_slices_occurrences<'a>(strings: &'a [&'a str]) -> BTreeMap<StrWrap<'a>, u32> {
+    let mut occurrences = BTreeMap::new();
+
+    let mut inc_slice = |slice| {
+        occurrences
+            .entry(StrWrap(slice))
+            .and_modify(|count| *count += 1)
+            .or_insert(1);
+    };
+
+    for string in strings {
+        let mut start = None;
+        string
+            .char_indices()
+            .map(|(index, c)| (index, c.to_ascii_lowercase()))
+            .for_each(|(index, c)| match c {
+                'a' | 'e' | 'i' | 'o' | 'u' => {
+                    if start.is_none() {
+                        start = Some(index);
+                    }
+                }
+                _ => {
+                    if let Some(start_index) = start {
+                        inc_slice(&string[start_index..index]);
+                        start = None;
+                    }
+                }
+            });
+
+        if let Some(start) = start {
+            inc_slice(&string[start..]);
+        }
+    }
+    occurrences
+}
+```
+
+---
+
+```rust
+#[derive(Copy, Clone)]
+pub struct StrWrap<'a>(&'a str);
+
+impl AsRef<str> for StrWrap<'_> {
+    fn as_ref(&self) -> &str {
+        self.0
+    }
+}
+
+impl Deref for StrWrap<'_> {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
+
+impl PartialOrd for StrWrap<'_> {
+    fn partial_cmp(&self, other: &StrWrap<'_>) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for StrWrap<'_> {
+    fn cmp(&self, other: &StrWrap<'_>) -> Ordering {
+        self.0
+            .chars()
+            .zip(other.0.chars())
+            .map(|(a, b)| a.to_ascii_lowercase().cmp(&b.to_ascii_lowercase()))
+            .find(|order| !matches!(order, Ordering::Equal))
+            .unwrap_or_else(|| self.0.len().cmp(&other.0.len()))
+    }
+}
+
+impl PartialEq for StrWrap<'_> {
+    fn eq(&self, other: &StrWrap<'_>) -> bool {
+        self.0.eq_ignore_ascii_case(other.0)
+    }
+}
+
+impl Eq for StrWrap<'_> {}
+```
+
+---
+
+```rust
+impl Ord for StrWrap<'_> {
+    fn cmp(&self, other: &StrWrap<'_>) -> Ordering {
+        self.0
+            .chars()
+            .zip(other.0.chars())
+            .map(|(a, b)| a.to_ascii_lowercase().cmp(&b.to_ascii_lowercase()))
+            .find(|order| !matches!(order, Ordering::Equal))
+            .unwrap_or_else(|| self.0.len().cmp(&other.0.len()))
+    }
+}
+
+impl PartialEq for StrWrap<'_> {
+    fn eq(&self, other: &StrWrap<'_>) -> bool {
+        self.0.eq_ignore_ascii_case(other.0)
+    }
+}
+```
+
+---
+
+# Exercise 3
+
+---
+
+```rust
+pub fn all_same_sum_tuples(data: &[u32]) -> Vec<(&[u32; WIN_SIZE], &[u32])> {
+    data.windows(WIN_SIZE)
+        .enumerate()
+        .map(|(start_index, window)| {
+            (
+                <&[u32; WIN_SIZE]>::try_from(window).unwrap(),
+                data.iter().skip(WIN_SIZE + start_index),
+                start_index + WIN_SIZE,
+            )
+        })
+        .filter_map(|(window, rest_iter, rest_start_index)| {
+            let window_sum: u32 = window.iter().copied().sum();
+            rest_iter
+                .enumerate()
+                .filter(|&(_, x)| x <= &window_sum)
+                .map(|(rest_offset, &x)| (rest_offset + rest_start_index, x))
+                .with_iter()
+                .filter_map(|((first_index, x), rest)| {
+                    rest.scan(x, |acc, (index, cur)| {
+                        *acc += cur;
+                        Some((index, *acc))
+                    })
+                    .take_while(|&(_, x)| x <= window_sum)
+                    .last()
+                    .filter(|&(_, sum)| sum == window_sum)
+                    .map(|(last_index, _)| &data[first_index..=last_index])
+                })
+                .enumerate()
+                .max_by(|(index_a, slice_a), (index_b, slice_b)| {
+                    slice_a
+                        .len()
+                        .cmp(&slice_b.len())
+                        .then_with(|| index_a.cmp(index_b))
+                })
+                .map(|(_, slice)| (window, slice))
+        })
+        .collect()
+}
+```
+
+---
+
+```rust
+const WIN_SIZE: usize = 5;
+
+trait WithIterExt: Sized {
+    fn with_iter(self) -> WithIter<Self>;
+}
+
+impl<I> WithIterExt for I
+where
+    I: Iterator,
+{
+    fn with_iter(self) -> WithIter<Self> {
+        WithIter(self)
+    }
+}
+
+struct WithIter<I>(I);
+
+impl<I> Iterator for WithIter<I>
+where
+    I: Iterator + Clone,
+{
+    type Item = (<I as Iterator>::Item, I);
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|value| (value, self.0.clone()))
+    }
+}
+```
+
+---
+
+# Thanks again!
+
+---
