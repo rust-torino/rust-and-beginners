@@ -60,9 +60,9 @@
 * Stack & registers: extremely volatile memory
 * When you exit a function, stack is "unwound", most of registers are considered scratch
 * Local stack persists in inner calls
-* Stack management is handled at **compile time**
+* Stack management is handled at **compile time** (how the cpu must use the memory when a function is called, for instance)
 * Use the heap for other purposes (i.e.: runtime size)
-* BSS memory for something in between
+* BSS memory (Block Started by Symbol, where global and static variables are stored) for something in between
 
 ---
 
@@ -278,7 +278,7 @@ error[E0502]: cannot borrow `s` as immutable because it is also borrowed as muta
 * Reference to a *non-mutable* piece of a string
 * `&String` -> `&str` almost "automagically"
 * Sort of *fat* pointer (address + size)
-* `&'static str` and BSS
+* `&'static str` and BSS (a static variable must be placed in this specific region of memory)
 
 ---
 
