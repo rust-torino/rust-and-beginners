@@ -8,7 +8,7 @@
 
 ## Prerequisites
 
-* Basic knowledge of the major features of the language
+* Basic knowledge of the major features of the language: types and functions in particular.
 * The first ten chapters of the book (extremely related to the previous point)
 
 ---
