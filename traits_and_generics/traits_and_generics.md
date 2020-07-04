@@ -195,6 +195,13 @@ Yuch!
 
 ---
 
+# About sizeness
+
+* When you write a trait, it is automatically `?Sized`. If you need it to imply `Sized`, you need to specify it
+* When you write a trait bound, it is automatically `Sized`. If you allow a `?Sized` trait, you need to specify it
+
+---
+
 # Expressing trait bounds
 
 ```rust
@@ -271,6 +278,13 @@ where
 
 ---
 
+# Bind only your traits!
+
+* Use generics bounds on your traits
+* **Don't use** bounds on your structs -- leave generics unbound if you can
+
+---
+
 # Using `impl Trait`
 
 ```rust
@@ -291,6 +305,21 @@ fn do_eat(other: impl Eatable<MaterialWhenEaten = impl ToProteins>)
 
 # Good usage of `impl Trait`
 
+## Returning an `impl Iterator`
+
+```rust
+trait Iterator {
+  type Item;
+
+  fn next(&mut self) -> Option<Self::Item>;
+  /* + a lot of default implemented methods */
+}
+```
+
+---
+
+# Good usage of `impl Trait` with iterators
+
 ```rust
 fn do_iter(&self) -> impl Iterator<Item = &A> {
   /* ... */
@@ -299,4 +328,56 @@ fn do_iter(&self) -> impl Iterator<Item = &A> {
 
 * The caller **must not** be able to choose what the function returns
 * An _opaque_ type is returned (you can change the type without having an API break)
-* Iterator types can be very complex, this is trivial
+* Iterator types can be very complex, this return type is trivial
+
+---
+
+# Higher-Rank Trait Bounds (HRTBs)
+
+```rust
+fn call_on_ref_zero<F>(f: F)
+where
+  //     This lifetime is sort of unbound
+  //     |
+  //     v
+  F: for<'a> Fn(&'a i32)
+{
+    let zero = 0;
+    f(&zero);
+}
+```
+
+---
+
+# Understanding the limits of traits
+
+---
+
+# Orphan rules
+
+* You can impl **your** trait for **your** struct
+* You can impl **your** trait for foreign structs
+* You can impl foreign traits for **your** struct
+* You **cannot** impl foreign traits for foreign structs
+
+---
+
+# Object safety for `dyn Trait`
+
+A trait is object safe if all the methods follow the following rules:
+
+* The return type isn’t Self.
+* There are no generic type parameters.
+
+---
+
+# We don't have Generic Associated Types (GATs)
+
+You cannot write this, for now:
+
+```rust
+trait StreamingIterator {
+    type Item<'a>;
+    fn next<'a>(&'a mut self) -> Option<Self::Item<'a>>;
+}
+```
