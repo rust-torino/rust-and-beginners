@@ -381,3 +381,25 @@ trait StreamingIterator {
     fn next<'a>(&'a mut self) -> Option<Self::Item<'a>>;
 }
 ```
+
+---
+
+# Exercises
+
+---
+
+# Exercise 1
+
+Implement a state machine, with 5 states: `Start`, `State1`, `State2`, `State3` and `End`. Use traits to implement the behavior `next_state` common to all of them except for `End`.
+
+---
+
+# Exercise 2
+
+Implement a function that takes an iterator of closures and run them. Easy, isn't it?
+
+---
+
+# Exercise 3
+
+Extend the `Iterator` trait so the `with_iter` function can be called. If the iterator `I0` produces `T`, using `with_iter` must produce the iterator `I1` that produces the tuple `(T, I0)`.
