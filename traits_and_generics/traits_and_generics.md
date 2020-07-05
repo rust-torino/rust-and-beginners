@@ -209,7 +209,11 @@ trait Walk {
   fn walk(&self);
 }
 
-trait Run: Walk {
+trait Jump {
+  fn jump(&self);
+}
+
+trait Run: Walk + Jump {
   fn run(&self);
 }
 ```
